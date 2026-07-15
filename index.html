@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Catatan — Nadia Beauty</title>
+<style>
+  :root{
+    --cream:#FBF7F2;
+    --brown-dark:#3A2E28;
+    --brown-mid:#4A3A32;
+    --border:#EDE1D4;
+    --divider:#F3EBE1;
+    --muted:#B39A87;
+    --muted2:#7A6A5C;
+    --accent:#E8A87C;
+    --accent-text:#C9A88A;
+    --green:#7A9B76;
+    --gold:#B9895F;
+    --red:#A33B3B;
+    --red-bg:#FBEAEA;
+    --qris-bg:#E8DFF7;
+    --qris-text:#6B4FA0;
+    --cash-bg:#E3EEDD;
+    --cash-text:#4C7A3F;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--cream);
+    color:var(--brown-dark);
+  }
+  #app{min-height:100vh;padding-bottom:112px;position:relative;}
+
+  /* ---- header ---- */
+  .header{
+    background:var(--brown-dark);
+    color:var(--cream);
+    padding:32px 20px 24px;
+    border-radius:0 0 28px 28px;
+  }
+  .brand{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+  .brand svg{color:var(--accent);}
+  .brand span{font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);}
+  .header h1{font-size:24px;font-weight:600;letter-spacing:-0.02em;margin:0 0 16px;}
+
+  .saldo-box{background:var(--brown-mid);border-radius:16px;padding:16px;margin-bottom:12px;}
+  .saldo-box .label{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent-text);margin-bottom:4px;}
+  .saldo-box .value{font-size:24px;font-weight:600;}
+  .saldo-box .value.compact{font-size:19px;word-break:break-word;}
+
+  .sub-label{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent-text);margin-bottom:8px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .mini-box{background:var(--brown-mid);border-radius:16px;padding:12px;margin-bottom:12px;}
+  .mini-box.faded{background:rgba(74,58,50,0.6);}
+  .mini-box .label{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent-text);margin-bottom:4px;}
+  .mini-box .value{font-size:18px;font-weight:600;}
+  .mini-box .value.small{font-size:16px;}
+
+  .header-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+  .btn{
+    font-size:14px;font-weight:500;padding:10px 0;border-radius:12px;border:none;cursor:pointer;
+    font-family:inherit;
+  }
+  .btn-accent{background:var(--accent);color:var(--brown-dark);}
+  .btn-outline-accent{background:transparent;color:var(--accent);border:1px solid var(--accent);}
+  .btn-outline-accent:disabled{opacity:.4;cursor:not-allowed;}
+
+  /* ---- error ---- */
+  .error-box{
+    margin:16px 20px 0;background:var(--red-bg);color:var(--red);
+    font-size:14px;padding:8px 16px;border-radius:12px;
+  }
+
+  /* ---- list ---- */
+  .list{padding:24px 20px 0;display:flex;flex-direction:column;gap:16px;}
+  .empty-state{text-align:center;padding:64px 0;color:var(--muted);}
+  .empty-state .t1{font-size:14px;}
+  .empty-state .t2{font-size:12px;margin-top:4px;}
+
+  .day-card{background:#fff;border-radius:16px;border:1px solid var(--border);overflow:hidden;}
+  .day-toggle{
+    width:100%;display:flex;align-items:center;justify-content:space-between;
+    padding:12px 16px;background:none;border:none;cursor:pointer;font-family:inherit;text-align:left;
+  }
+  .day-toggle .date-label{font-size:14px;font-weight:500;color:var(--brown-dark);}
+  .day-toggle .date-sub{font-size:12px;color:var(--muted);}
+  .day-toggle svg{color:var(--muted);flex-shrink:0;}
+
+  .day-items{border-top:1px solid var(--border);}
+  .entry-row{
+    padding:12px 16px;display:flex;align-items:flex-start;gap:12px;border-top:1px solid var(--divider);
+  }
+  .entry-row:first-child{border-top:none;}
+  .entry-main{flex:1;min-width:0;}
+  .entry-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .entry-title{font-size:14px;font-weight:500;}
+  .badge{font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:2px 6px;border-radius:999px;}
+  .badge.qris{background:var(--qris-bg);color:var(--qris-text);}
+  .badge.cash{background:var(--cash-bg);color:var(--cash-text);}
+  .entry-modal-harga{font-size:12px;color:var(--muted);margin-top:2px;}
+  .entry-amounts{font-size:12px;margin-top:4px;display:flex;gap:12px;}
+  .entry-amounts .inu{color:var(--green);}
+  .entry-amounts .aka{color:var(--gold);}
+  .entry-catatan{font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;}
+  .icon-btn{background:none;border:none;cursor:pointer;color:#D9B8A8;padding:4px;flex-shrink:0;}
+  .icon-btn:hover{color:var(--red);}
+
+  /* ---- withdrawal history ---- */
+  .wd-section{padding:24px 20px 0;}
+  .wd-section .sub-label{color:var(--muted);}
+  .wd-card{background:#fff;border-radius:16px;border:1px solid var(--border);}
+  .wd-row{padding:12px 16px;display:flex;align-items:flex-start;gap:12px;border-top:1px solid var(--divider);}
+  .wd-row:first-child{border-top:none;}
+  .wd-amount-row{display:flex;align-items:center;gap:8px;}
+  .wd-amount{font-size:14px;font-weight:500;}
+  .wd-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  /* ---- FAB ---- */
+  .fab{
+    position:fixed;bottom:24px;right:24px;background:var(--brown-dark);color:var(--cream);
+    width:56px;height:56px;border-radius:999px;border:none;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);cursor:pointer;transition:transform .1s;
+  }
+  .fab:active{transform:scale(.95);}
+
+  /* ---- modals ---- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;justify-content:center;
+    z-index:50;
+  }
+  .overlay.center{align-items:center;padding:0 24px;}
+  .sheet{
+    width:100%;max-width:448px;background:var(--cream);border-radius:24px 24px 0 0;
+    display:flex;flex-direction:column;max-height:88vh;
+  }
+  .dialog{
+    width:100%;max-width:384px;background:var(--cream);border-radius:16px;padding:20px;
+  }
+  .sheet-header{padding:20px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .sheet-handle{width:40px;height:4px;background:#DCC9B6;border-radius:999px;margin:0 auto 16px;}
+  .sheet-header h2{font-size:18px;font-weight:600;margin:0;}
+  .sheet-body{padding:16px 20px;overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:16px;}
+  .sheet-footer{padding:16px 20px;display:flex;gap:12px;border-top:1px solid var(--border);flex-shrink:0;}
+
+  .field label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px;display:block;}
+  .field input[type=text],.field input[type=number],.field input[type=date]{
+    width:100%;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:14px;
+    font-family:inherit;
+  }
+  .choice-grid{display:grid;gap:8px;}
+  .choice-grid.cols-2{grid-template-columns:1fr 1fr;}
+  .choice-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+  .choice-btn{
+    font-size:14px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#fff;
+    color:var(--brown-dark);cursor:pointer;font-family:inherit;text-align:left;
+  }
+  .choice-btn.small{font-size:12px;padding:8px;text-align:center;}
+  .choice-btn.active{background:var(--brown-dark);color:var(--cream);border-color:var(--brown-dark);}
+  .choice-btn.active-accent{background:var(--accent);color:var(--brown-dark);border-color:var(--accent);}
+  .kombo-btn{
+    width:100%;display:flex;align-items:center;justify-content:space-between;font-size:14px;
+    padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:inherit;
+  }
+  .kombo-btn.active{background:var(--brown-dark);color:var(--cream);border-color:var(--brown-dark);}
+  .kombo-btn .price{color:var(--muted);}
+  .kombo-btn.active .price{color:var(--accent);}
+
+  .karet-group{display:flex;flex-direction:column;gap:12px;}
+  .karet-group.boxed{background:#fff;border:1px solid var(--border);border-radius:16px;padding:12px;}
+  .karet-group-title{font-size:12px;font-weight:600;}
+
+  .preview-box{background:var(--divider);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px;}
+  .preview-title{font-size:14px;font-weight:500;margin-bottom:4px;}
+  .preview-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted2);}
+  .preview-divider{height:1px;background:#DCC9B6;margin:6px 0;}
+  .preview-row.big{font-size:14px;font-weight:500;}
+  .preview-row.inu{color:var(--green);}
+  .preview-row.aka{color:var(--gold);}
+
+  .btn-full{flex:1;padding:12px 0;border-radius:12px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;border:1px solid var(--border);background:transparent;color:var(--brown-dark);}
+  .btn-full.primary{background:var(--brown-dark);color:var(--cream);border:none;}
+  .btn-full.primary:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-full.danger{background:var(--red);color:var(--cream);border:none;}
+
+  .dialog h3{font-size:16px;font-weight:600;margin:0 0 8px;}
+  .dialog p{font-size:14px;color:var(--muted2);margin:0 0 16px;}
+  .dialog-actions{display:flex;gap:12px;}
+
+  .loading-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--cream);}
+  .loading-screen .txt{color:#B98A6F;font-size:14px;letter-spacing:.02em;}
+
+  .hidden{display:none !important;}
+  .link-btn{background:none;border:none;color:var(--gold);font-size:12px;padding:0;margin-top:6px;cursor:pointer;font-family:inherit;}
+</style>
+</head>
+<body>
+
+<div id="loading" class="loading-screen">
+  <div class="txt">Memuat…</div>
+</div>
+
+<div id="app" class="hidden"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================== DATA ATURAN ===================== */
+const RULES = {
+  behel_bagus: { label: "Behel bagus", modal: 53000, harga: 80000, inu: 15000, aka: 12000 },
+  benerin: { label: "Benerin behel", modal: 4000, harga: 6000, inu: 1000, aka: 1000 },
+};
+
+// Behel biasa harganya tergantung jumlah bracket yang dipasang (per rahang: atas
+// aja atau bawah aja). Kalau atas-bawah, tinggal dikali 2 dari harga satuan ini.
+const BEHEL_BIASA_BRACKET = {
+  8: { label: "8 bracket", modal: 33000, harga: 50000, inu: 10000, aka: 7000 },
+  10: { label: "10 bracket", modal: 35500, harga: 60000, inu: 14400, aka: 10100 },
+};
+
+// Behel bagus atas-bawah adalah paket dengan harga khusus (bukan 2x harga satuan).
+// Modal ikut diskon proporsional mengikuti skala harga, sisanya dibagi Inu:Aka
+// dengan rasio yang sama seperti behel bagus biasa (15:12), lalu dibulatkan
+// ke ratusan terdekat supaya angkanya rapi. Total tetap pas 150.000.
+const BEHEL_BAGUS_ATAS_BAWAH = { modal: 99400, harga: 150000, inu: 28100, aka: 22500 };
+
+const KATEGORI_LIST = [
+  { key: "behel_biasa", nama: "Behel biasa" },
+  { key: "behel_bagus", nama: "Behel bagus" },
+  { key: "diamond", nama: "Diamond" },
+  { key: "karet_kawat", nama: "Ganti karet / kawat" },
+  { key: "benerin", nama: "Benerin behel" },
+];
+
+// Modal karet berbeda tergantung jenis karet yang dipakai di tiap tipe:
+// - Tipe 1, 5: pakai karet biasa (modal 2.000)
+// - Tipe 3: karet biasa double (modal 4.000)
+// - Tipe 2: karet tarik (modal 3.000)
+// - Tipe 6: karet tarik satu lubang (modal 5.000)
+// - Tipe 4: gabungan karet biasa + karet tarik (modal 2.000 + 3.000 = 5.000)
+const MODAL_KARET_PER_TIPE = { 1: 2000, 2: 3000, 3: 4000, 4: 5000, 5: 2000, 6: 5000 };
+const MODAL_KOMPONEN = { kawat_besi: 3000, kawat_warna: 2000 };
+
+const KARET_TIPE = [
+  { id: 1, nama: "Tipe 1", karet: 5000, kawat_warna: 7000, kawat_besi: 10000 },
+  { id: 2, nama: "Tipe 2", karet: 7000, kawat_warna: 9000, kawat_besi: 12000 },
+  { id: 3, nama: "Tipe 3", karet: 8000, kawat_warna: 12000, kawat_besi: 13000 },
+  { id: 4, nama: "Tipe 4", karet: 9000, kawat_warna: 12000, kawat_besi: 14000 },
+  { id: 5, nama: "Tipe 5", karet: 9000, kawat_warna: 12000, kawat_besi: 15000 },
+  { id: 6, nama: "Tipe 6", karet: 10000, kawat_warna: 13000, kawat_besi: 18000 },
+];
+
+// Nama tampilan untuk pilihan kombinasi (modal-nya dihitung dinamis per tipe
+// karet yang dipilih, lihat hitungSatuKaret).
+const KOMBINASI_LIST = [
+  { key: "karet", nama: "Karet aja" },
+  { key: "kawat_warna", nama: "Karet + kawat warna" },
+  { key: "kawat_besi", nama: "Karet + kawat besi" },
+];
+
+const rupiah = (n) => "Rp" + Math.round(n).toLocaleString("id-ID");
+const todayStr = () => new Date().toISOString().slice(0, 10);
+const fmtTanggal = (iso) => {
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+};
+const uid = () => Date.now().toString() + Math.random().toString(36).slice(2, 7);
+
+/* ===================== ICONS (inline svg) ===================== */
+const ICONS = {
+  plus: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  trash: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
+  chevronDown: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+  chevronUp: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`,
+  sparkles: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>`,
+};
+
+/* ===================== INDEXEDDB LAYER ===================== */
+const DB_NAME = "gaji_tracker_db";
+const DB_VERSION = 1;
+const STORE = "kv"; // simple key-value store: {key, value}
+
+let dbPromise = null;
+function openDB() {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((resolve, reject) => {
+    let settled = false;
+    const timeoutId = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new Error("Timeout membuka database."));
+    }, 2500);
+
+    let req;
+    try {
+      req = indexedDB.open(DB_NAME, DB_VERSION);
+    } catch (err) {
+      clearTimeout(timeoutId);
+      settled = true;
+      reject(err);
+      return;
+    }
+
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE)) {
+        db.createObjectStore(STORE, { keyPath: "key" });
+      }
+    };
+    req.onsuccess = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      resolve(req.result);
+    };
+    req.onerror = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      reject(req.error || new Error("Gagal membuka database."));
+    };
+    req.onblocked = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      reject(new Error("Database terblokir (kemungkinan tab lain masih terbuka)."));
+    };
+  });
+  // If opening ultimately fails, keep this rejected promise cached briefly so
+  // that multiple calls made back-to-back (like the three idbGet calls in
+  // loadAll) share the same failure instead of each paying a fresh timeout.
+  // After a short cooldown, allow a later call to retry from scratch.
+  dbPromise.catch(() => {
+    setTimeout(() => { dbPromise = null; }, 3000);
+  });
+  return dbPromise;
+}
+
+async function idbGet(key) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const timeoutId = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new Error("Timeout membaca data."));
+    }, 2500);
+    try {
+      const tx = db.transaction(STORE, "readonly");
+      const store = tx.objectStore(STORE);
+      const req = store.get(key);
+      req.onsuccess = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        resolve(req.result ? req.result.value : null);
+      };
+      req.onerror = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        reject(req.error);
+      };
+    } catch (err) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      reject(err);
+    }
+  });
+}
+
+async function idbSet(key, value) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const timeoutId = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new Error("Timeout menyimpan data."));
+    }, 2500);
+    try {
+      const tx = db.transaction(STORE, "readwrite");
+      const store = tx.objectStore(STORE);
+      const req = store.put({ key, value });
+      req.onsuccess = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        resolve(true);
+      };
+      req.onerror = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        reject(req.error);
+      };
+    } catch (err) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      reject(err);
+    }
+  });
+}
+
+/* ===================== STATE ===================== */
+const state = {
+  entries: [],
+  withdrawals: [],
+  withdrawnAt: null, // ISO timestamp of last "tarik semua" — totals only count entries after this
+  loaded: false,
+  showForm: false,
+  expandedDate: null,
+  saving: false,
+  error: "",
+
+  kategori: "behel_biasa",
+  posisi: "bawah",
+  jumlahBracket: 8,
+  jumlahDiamond: 1,
+  jumlahBenerin: 1,
+  karetPosisi: "atas",
+  karetTipeAtas: 1,
+  karetKombinasiAtas: "karet",
+  karetTipeBawah: 1,
+  karetKombinasiBawah: "karet",
+  catatan: "",
+  tanggal: todayStr(),
+  metodeBayar: "cash",
+
+  confirmDeleteEntry: null,
+  confirmDeleteWithdraw: null,
+};
+
+function resetForm() {
+  state.kategori = "behel_biasa";
+  state.posisi = "bawah";
+  state.jumlahBracket = 8;
+  state.jumlahDiamond = 1;
+  state.jumlahBenerin = 1;
+  state.karetPosisi = "atas";
+  state.karetTipeAtas = 1;
+  state.karetKombinasiAtas = "karet";
+  state.karetTipeBawah = 1;
+  state.karetKombinasiBawah = "karet";
+  state.catatan = "";
+  state.tanggal = todayStr();
+  state.metodeBayar = "cash";
+}
+
+/* ===================== PERSISTENCE ===================== */
+async function persistEntries(next) {
+  state.entries = next;
+  state.saving = true;
+  render();
+  try {
+    await idbSet("entries", next);
+    state.error = "";
+  } catch (e) {
+    state.error = "Gagal menyimpan. Coba lagi.";
+  }
+  state.saving = false;
+  render();
+}
+
+async function persistWithdrawals(next) {
+  state.withdrawals = next;
+  state.saving = true;
+  render();
+  try {
+    await idbSet("withdrawals", next);
+    state.error = "";
+  } catch (e) {
+    state.error = "Gagal menyimpan. Coba lagi.";
+  }
+  state.saving = false;
+  render();
+}
+
+async function loadAll() {
+  try {
+    const e = await idbGet("entries");
+    if (e) state.entries = e;
+  } catch (err) {}
+  try {
+    const w = await idbGet("withdrawals");
+    if (w) state.withdrawals = w;
+  } catch (err) {}
+  try {
+    const wa = await idbGet("withdrawnAt");
+    if (wa) state.withdrawnAt = wa;
+  } catch (err) {}
+  state.loaded = true;
+}
+
+/* ===================== CALCULATION ===================== */
+function hitungSatuKaret(tipeId, komboKey) {
+  const tipe = KARET_TIPE.find((t) => t.id === tipeId);
+  const kombo = KOMBINASI_LIST.find((k) => k.key === komboKey);
+  const harga = tipe ? tipe[komboKey] : 0;
+  const modalKaret = MODAL_KARET_PER_TIPE[tipeId] || 0;
+  const modalKawat = komboKey === "kawat_warna" ? MODAL_KOMPONEN.kawat_warna
+    : komboKey === "kawat_besi" ? MODAL_KOMPONEN.kawat_besi
+    : 0;
+  const modal = modalKaret + modalKawat;
+  return { label: `${tipe ? tipe.nama : ""} · ${kombo ? kombo.nama : ""}`, harga, modal };
+}
+
+function hitung() {
+  const kategori = state.kategori;
+
+  if (kategori === "behel_biasa") {
+    const b = BEHEL_BIASA_BRACKET[state.jumlahBracket] || BEHEL_BIASA_BRACKET[8];
+    const mult = state.posisi === "atas_bawah" ? 2 : 1;
+    return {
+      label: `Behel biasa · ${b.label}` + (mult === 2 ? " (atas-bawah)" : ` (${state.posisi})`),
+      modal: b.modal * mult,
+      harga: b.harga * mult,
+      inu: b.inu * mult,
+      aka: b.aka * mult,
+      untung: (b.harga - b.modal) * mult,
+    };
+  }
+
+  if (kategori === "behel_bagus") {
+    const r = RULES[kategori];
+    const mult = state.posisi === "atas_bawah" ? 2 : 1;
+
+    if (state.posisi === "atas_bawah") {
+      const p = BEHEL_BAGUS_ATAS_BAWAH;
+      return {
+        label: r.label + " (atas-bawah)",
+        modal: p.modal,
+        harga: p.harga,
+        inu: p.inu,
+        aka: p.aka,
+        untung: p.harga - p.modal,
+      };
+    }
+
+    return {
+      label: r.label + (mult === 2 ? " (atas-bawah)" : ` (${state.posisi})`),
+      modal: r.modal * mult,
+      harga: r.harga * mult,
+      inu: r.inu * mult,
+      aka: r.aka * mult,
+      untung: (r.harga - r.modal) * mult,
+    };
+  }
+  if (kategori === "diamond") {
+    const n = Number(state.jumlahDiamond) || 0;
+    const modal = 4000 * n;
+    const inu = 1000 * n;
+    return { label: `Diamond x${n}`, modal, harga: modal + inu, inu, aka: 0, untung: inu };
+  }
+  if (kategori === "karet_kawat") {
+    if (state.karetPosisi === "keduanya") {
+      const atas = hitungSatuKaret(state.karetTipeAtas, state.karetKombinasiAtas);
+      const bawah = hitungSatuKaret(state.karetTipeBawah, state.karetKombinasiBawah);
+      const harga = atas.harga + bawah.harga;
+      const modal = atas.modal + bawah.modal;
+      const sisa = harga - modal;
+      return {
+        label: `Gigi atas: ${atas.label} · Gigi bawah: ${bawah.label}`,
+        modal, harga, inu: sisa, aka: 0, untung: sisa,
+      };
+    }
+    const single = state.karetPosisi === "bawah"
+      ? hitungSatuKaret(state.karetTipeBawah, state.karetKombinasiBawah)
+      : hitungSatuKaret(state.karetTipeAtas, state.karetKombinasiAtas);
+    const sisa = single.harga - single.modal;
+    return {
+      label: `Gigi ${state.karetPosisi === "bawah" ? "bawah" : "atas"}: ${single.label}`,
+      modal: single.modal, harga: single.harga, inu: sisa, aka: 0, untung: sisa,
+    };
+  }
+  if (kategori === "benerin") {
+    const r = RULES.benerin;
+    const n = Number(state.jumlahBenerin) || 0;
+    return {
+      label: `Benerin behel x${n}`,
+      modal: r.modal * n, harga: r.harga * n, inu: r.inu * n, aka: r.aka * n,
+      untung: (r.harga - r.modal) * n,
+    };
+  }
+  return null;
+}
+
+/* ===================== ACTIONS ===================== */
+async function tambahEntry() {
+  const preview = hitung();
+  if (!preview) return;
+  const entry = {
+    id: uid(),
+    tanggal: state.tanggal,
+    kategori: state.kategori,
+    metodeBayar: state.metodeBayar,
+    ...preview,
+    catatan: state.catatan.trim(),
+    createdAt: new Date().toISOString(),
+  };
+  await persistEntries([entry, ...state.entries]);
+  resetForm();
+  state.showForm = false;
+  state.expandedDate = entry.tanggal;
+  render();
+}
+
+async function hapusEntry(id) {
+  await persistEntries(state.entries.filter((e) => e.id !== id));
+}
+
+async function hapusWithdrawal(id) {
+  // Deleting a withdrawal record un-does its reset: entries from that point
+  // become "un-withdrawn" again, so totals should count them once more.
+  // Simplest correct approach: recompute withdrawnAt as the max createdAt
+  // among the remaining withdrawal records (or null if none left).
+  const next = state.withdrawals.filter((w) => w.id !== id);
+  const nextWithdrawnAt = next.length
+    ? next.reduce((latest, w) => (w.createdAt > latest ? w.createdAt : latest), next[0].createdAt)
+    : null;
+  state.withdrawnAt = nextWithdrawnAt;
+  try {
+    await idbSet("withdrawnAt", nextWithdrawnAt);
+  } catch (e) {}
+  await persistWithdrawals(next);
+}
+
+function computeTotals() {
+  const grouped = state.entries.reduce((acc, e) => {
+    (acc[e.tanggal] = acc[e.tanggal] || []).push(e);
+    return acc;
+  }, {});
+  const dates = Object.keys(grouped).sort((a, b) => (a < b ? 1 : -1));
+
+  // Only entries recorded after the last "tarik semua" count toward current
+  // totals — everything before that has already been fully paid out
+  // (modal returned, Aka's share taken, Inu's share taken).
+  const activeEntries = state.withdrawnAt
+    ? state.entries.filter((e) => e.createdAt > state.withdrawnAt)
+    : state.entries;
+
+  const totalAll = activeEntries.reduce(
+    (acc, e) => {
+      acc.inu += e.inu;
+      acc.aka += e.aka;
+      acc.untung += e.untung;
+      acc.modal += e.modal;
+      acc.harga += e.harga;
+      if (e.metodeBayar === "qris") acc.hargaQris += e.harga;
+      else acc.hargaCash += e.harga;
+      return acc;
+    },
+    { inu: 0, aka: 0, untung: 0, modal: 0, harga: 0, hargaCash: 0, hargaQris: 0 }
+  );
+
+  const saldoCash = totalAll.hargaCash;
+  const saldoQris = totalAll.hargaQris;
+
+  return { grouped, dates, totalAll, saldoCash, saldoQris };
+}
+
+async function tarikSemua() {
+  const { totalAll, saldoCash, saldoQris } = computeTotals();
+  if (saldoCash + saldoQris + totalAll.inu + totalAll.aka + totalAll.modal <= 0) return;
+
+  const now = new Date().toISOString();
+  const record = {
+    id: uid(),
+    jumlahCash: saldoCash,
+    jumlahQris: saldoQris,
+    jumlahInu: totalAll.inu,
+    jumlahAka: totalAll.aka,
+    createdAt: now,
+  };
+
+  state.withdrawnAt = now;
+  try {
+    await idbSet("withdrawnAt", now);
+  } catch (e) {}
+  await persistWithdrawals([record, ...state.withdrawals]);
+}
+
+/* ===================== RENDER HELPERS ===================== */
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function renderChoiceButtons(list, currentVal, dataAttr, extraClass) {
+  return list.map((item) => {
+    const val = typeof item === "object" ? item.v ?? item.key ?? item.id : item;
+    const label = typeof item === "object" ? item.l ?? item.nama : item;
+    const active = String(val) === String(currentVal);
+    return `<button type="button" class="choice-btn ${extraClass || ""} ${active ? "active" : ""}" data-${dataAttr}="${escapeHtml(val)}">${escapeHtml(label)}</button>`;
+  }).join("");
+}
+
+/* ===================== MAIN RENDER ===================== */
+function render() {
+  const app = document.getElementById("app");
+  if (!state.loaded) return;
+
+  document.getElementById("loading").classList.add("hidden");
+  app.classList.remove("hidden");
+
+  // Preserve focus, cursor position, and scroll position of any open sheet
+  // across the re-render, since we rebuild the whole DOM via innerHTML.
+  const active = document.activeElement;
+  const activeId = active && active.id;
+  const selStart = active && "selectionStart" in active ? active.selectionStart : null;
+  const selEnd = active && "selectionEnd" in active ? active.selectionEnd : null;
+  const sheetBodyBefore = document.querySelector(".sheet-body");
+  const scrollTop = sheetBodyBefore ? sheetBodyBefore.scrollTop : 0;
+  const mainScrollY = window.scrollY;
+
+  const { grouped, dates, totalAll, saldoCash, saldoQris } = computeTotals();
+  const preview = hitung();
+
+  let html = "";
+
+  /* ---- header ---- */
+  html += `
+  <div class="header">
+    <div class="brand">${ICONS.sparkles}<span>Nadia Beauty</span></div>
+    <h1>Catatan</h1>
+
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="saldo-box" style="margin-bottom:0;">
+        <div class="label">Total saldo (Cash + QRIS)</div>
+        <div class="value compact">${rupiah(saldoCash + saldoQris)}</div>
+      </div>
+      <div class="saldo-box" style="margin-bottom:0;">
+        <div class="label">Modal terkumpul</div>
+        <div class="value compact">${rupiah(totalAll.modal)}</div>
+      </div>
+    </div>
+
+    <div class="sub-label" style="color:var(--accent-text)">Rincian per metode</div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="mini-box"><div class="label">Cash</div><div class="value small">${rupiah(saldoCash)}</div></div>
+      <div class="mini-box"><div class="label">QRIS</div><div class="value small">${rupiah(saldoQris)}</div></div>
+    </div>
+
+    <button id="btn-tarik-semua" class="btn btn-accent" style="width:100%;margin-bottom:16px;" ${(saldoCash + saldoQris + totalAll.inu + totalAll.aka + totalAll.modal <= 0 || state.saving) ? "disabled" : ""}>Tarik semua saldo</button>
+
+    <div class="grid-2">
+      <div class="mini-box faded"><div class="label">Jasa Inu (belum ditarik)</div><div class="value small">${rupiah(totalAll.inu)}</div></div>
+      <div class="mini-box faded"><div class="label">Buat Aka (belum ditarik)</div><div class="value small">${rupiah(totalAll.aka)}</div></div>
+    </div>
+  </div>`;
+
+  if (state.error) {
+    html += `<div class="error-box">${escapeHtml(state.error)}</div>`;
+  }
+
+  /* ---- list ---- */
+  html += `<div class="list">`;
+  if (dates.length === 0) {
+    html += `<div class="empty-state">
+      <div class="t1">Belum ada catatan.</div>
+      <div class="t2">Tekan tombol + untuk mulai catat transaksi hari ini.</div>
+    </div>`;
+  }
+  dates.forEach((date) => {
+    const items = grouped[date];
+    const dayTotal = items.reduce((a, e) => { a.inu += e.inu; a.aka += e.aka; return a; }, { inu: 0, aka: 0 });
+    const isOpen = state.expandedDate === date;
+    html += `
+    <div class="day-card">
+      <button type="button" class="day-toggle" data-toggle-date="${escapeHtml(date)}">
+        <div>
+          <div class="date-label">${fmtTanggal(date)}</div>
+          <div class="date-sub">${items.length} transaksi · Inu ${rupiah(dayTotal.inu)}${dayTotal.aka > 0 ? ` · Aka ${rupiah(dayTotal.aka)}` : ""}</div>
+        </div>
+        ${isOpen ? ICONS.chevronUp : ICONS.chevronDown}
+      </button>
+      ${isOpen ? `<div class="day-items">` + items.map((e) => `
+        <div class="entry-row">
+          <div class="entry-main">
+            <div class="entry-title-row">
+              <div class="entry-title">${escapeHtml(e.label)}</div>
+              <span class="badge ${e.metodeBayar === "qris" ? "qris" : "cash"}">${e.metodeBayar === "qris" ? "QRIS" : "Cash"}</span>
+            </div>
+            <div class="entry-modal-harga">Modal ${rupiah(e.modal)} · Harga ${rupiah(e.harga)}</div>
+            <div class="entry-amounts">
+              <span class="inu">Inu ${rupiah(e.inu)}</span>
+              ${e.aka > 0 ? `<span class="aka">Aka ${rupiah(e.aka)}</span>` : ""}
+            </div>
+            ${e.catatan ? `<div class="entry-catatan">${escapeHtml(e.catatan)}</div>` : ""}
+          </div>
+          <button type="button" class="icon-btn" data-delete-entry="${e.id}" aria-label="Hapus">${ICONS.trash}</button>
+        </div>
+      `).join("") + `</div>` : ""}
+    </div>`;
+  });
+  html += `</div>`;
+
+  /* ---- withdrawal history ---- */
+  if (state.withdrawals.length > 0) {
+    html += `
+    <div class="wd-section">
+      <div class="sub-label">Riwayat tarik saldo</div>
+      <div class="wd-card">
+        ${state.withdrawals.map((w) => {
+          const total = w.jumlahCash + w.jumlahQris;
+          return `
+          <div class="wd-row">
+            <div class="entry-main">
+              <div class="wd-amount-row">
+                <span class="wd-amount">${rupiah(total)}</span>
+              </div>
+              <div class="wd-sub">${new Date(w.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })} · Cash ${rupiah(w.jumlahCash)} · QRIS ${rupiah(w.jumlahQris)}</div>
+              <div class="wd-sub">Inu ${rupiah(w.jumlahInu)} · Aka ${rupiah(w.jumlahAka)}</div>
+            </div>
+            <button type="button" class="icon-btn" data-delete-withdraw="${w.id}" aria-label="Hapus">${ICONS.trash}</button>
+          </div>
+        `;
+        }).join("")}
+      </div>
+    </div>`;
+  }
+
+  /* ---- FAB ---- */
+  html += `<button type="button" id="fab-add" class="fab" aria-label="Tambah transaksi">${ICONS.plus}</button>`;
+
+  /* ---- form modal ---- */
+  if (state.showForm) {
+    html += `
+    <div class="overlay" id="overlay-form">
+      <div class="sheet">
+        <div class="sheet-header">
+          <div class="sheet-handle"></div>
+          <h2>Catat transaksi</h2>
+        </div>
+        <div class="sheet-body">
+          <div class="field">
+            <label>Tanggal</label>
+            <input type="date" id="f-tanggal" value="${state.tanggal}" />
+          </div>
+
+          <div class="field">
+            <label>Kategori</label>
+            <div class="choice-grid cols-2" id="f-kategori-group">
+              ${renderChoiceButtons(KATEGORI_LIST.map(k => ({v:k.key,l:k.nama})), state.kategori, "kategori")}
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Metode bayar</label>
+            <div class="choice-grid cols-2" id="f-metode-group">
+              ${renderChoiceButtons([{v:"cash",l:"Cash"},{v:"qris",l:"QRIS"}], state.metodeBayar, "metode")}
+            </div>
+          </div>
+
+          ${(state.kategori === "behel_biasa" || state.kategori === "behel_bagus") ? `
+          <div class="field">
+            <label>Posisi</label>
+            <div class="choice-grid cols-3" id="f-posisi-group">
+              ${[{v:"atas",l:"Atas"},{v:"bawah",l:"Bawah"},{v:"atas_bawah",l:"Atas-Bawah"}].map(p => {
+                const active = state.posisi === p.v;
+                return `<button type="button" class="choice-btn ${active ? "active-accent" : ""}" data-posisi="${p.v}">${p.l}</button>`;
+              }).join("")}
+            </div>
+          </div>` : ""}
+
+          ${state.kategori === "behel_biasa" ? `
+          <div class="field">
+            <label>Jumlah bracket</label>
+            <div class="choice-grid cols-2" id="f-jumlah-bracket-group">
+              ${[8, 10].map(n => {
+                const active = Number(state.jumlahBracket) === n;
+                return `<button type="button" class="choice-btn ${active ? "active-accent" : ""}" data-jumlah-bracket="${n}">${n} bracket</button>`;
+              }).join("")}
+            </div>
+          </div>` : ""}
+
+          ${state.kategori === "diamond" ? `
+          <div class="field">
+            <label>Jumlah diamond</label>
+            <input type="number" min="1" id="f-jumlah-diamond" value="${state.jumlahDiamond}" />
+          </div>` : ""}
+
+          ${state.kategori === "benerin" ? `
+          <div class="field">
+            <label>Jumlah behel dibenerin</label>
+            <input type="number" min="1" id="f-jumlah-benerin" value="${state.jumlahBenerin}" />
+          </div>` : ""}
+
+          ${state.kategori === "karet_kawat" ? renderKaretFields() : ""}
+
+          <div class="field">
+            <label>Catatan (nama pasien, dll — opsional)</label>
+            <input type="text" id="f-catatan" placeholder="misal: Sarah" value="${escapeHtml(state.catatan)}" />
+          </div>
+
+          ${preview ? `
+          <div class="preview-box">
+            <div class="preview-title">${escapeHtml(preview.label)}</div>
+            <div class="preview-row"><span>Modal</span><span>${rupiah(preview.modal)}</span></div>
+            <div class="preview-row"><span>Harga</span><span>${rupiah(preview.harga)}</span></div>
+            <div class="preview-divider"></div>
+            <div class="preview-row big inu"><span>Jasa Inu</span><span>${rupiah(preview.inu)}</span></div>
+            ${preview.aka > 0 ? `<div class="preview-row big aka"><span>Buat Aka</span><span>${rupiah(preview.aka)}</span></div>` : ""}
+          </div>` : ""}
+        </div>
+        <div class="sheet-footer">
+          <button type="button" class="btn-full" id="btn-cancel-form">Batal</button>
+          <button type="button" class="btn-full primary" id="btn-save-entry" ${state.saving ? "disabled" : ""}>${state.saving ? "Menyimpan…" : "Simpan"}</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* ---- confirm delete entry ---- */
+  if (state.confirmDeleteEntry) {
+    const e = state.confirmDeleteEntry;
+    html += `
+    <div class="overlay center" id="overlay-confirm-entry">
+      <div class="dialog">
+        <h3>Hapus transaksi?</h3>
+        <p>${escapeHtml(e.label)} · ${rupiah(e.harga)}${e.catatan ? ` (${escapeHtml(e.catatan)})` : ""} akan dihapus permanen. Aksi ini tidak bisa dibatalkan.</p>
+        <div class="dialog-actions">
+          <button type="button" class="btn-full" id="btn-cancel-delete-entry">Batal</button>
+          <button type="button" class="btn-full danger" id="btn-confirm-delete-entry">Hapus</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* ---- confirm delete withdraw ---- */
+  if (state.confirmDeleteWithdraw) {
+    const w = state.confirmDeleteWithdraw;
+    const total = w.jumlahCash + w.jumlahQris;
+    html += `
+    <div class="overlay center" id="overlay-confirm-withdraw">
+      <div class="dialog">
+        <h3>Hapus riwayat tarik saldo?</h3>
+        <p>Penarikan ${rupiah(total)} (Cash ${rupiah(w.jumlahCash)}, QRIS ${rupiah(w.jumlahQris)}) akan dihapus. Saldo, Jasa Inu, dan Buat Aka dari transaksi terkait akan muncul kembali.</p>
+        <div class="dialog-actions">
+          <button type="button" class="btn-full" id="btn-cancel-delete-withdraw">Batal</button>
+          <button type="button" class="btn-full danger" id="btn-confirm-delete-withdraw">Hapus</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  app.innerHTML = html;
+  attachEvents();
+
+  // Restore scroll position of the sheet body (form/withdraw modal contents)
+  const sheetBodyAfter = document.querySelector(".sheet-body");
+  if (sheetBodyAfter) sheetBodyAfter.scrollTop = scrollTop;
+  window.scrollTo(0, mainScrollY);
+
+  // Restore focus + cursor position to whatever input was focused before render
+  if (activeId) {
+    const el = document.getElementById(activeId);
+    if (el) {
+      el.focus();
+      if (selStart !== null && selEnd !== null && typeof el.setSelectionRange === "function") {
+        try { el.setSelectionRange(selStart, selEnd); } catch (e) {}
+      }
+    }
+  }
+}
+
+function renderKaretFields() {
+  const posisiGrid = `
+    <div class="field">
+      <label>Posisi gigi</label>
+      <div class="choice-grid cols-3" id="f-karet-posisi-group">
+        ${[{v:"atas",l:"Atas"},{v:"bawah",l:"Bawah"},{v:"keduanya",l:"Keduanya"}].map(p => {
+          const active = state.karetPosisi === p.v;
+          return `<button type="button" class="choice-btn ${active ? "active-accent" : ""}" data-karet-posisi="${p.v}">${p.l}</button>`;
+        }).join("")}
+      </div>
+    </div>`;
+
+  function group(sideLabel, tipeVal, komboVal, tipeAttr, komboAttr, boxed) {
+    const tipe = KARET_TIPE.find(t => t.id === tipeVal);
+    return `
+    <div class="karet-group ${boxed ? "boxed" : ""}">
+      ${boxed ? `<div class="karet-group-title">${sideLabel}</div>` : ""}
+      <div class="field">
+        <label>Tipe karet</label>
+        <div class="choice-grid cols-3">
+          ${KARET_TIPE.map(t => {
+            const active = tipeVal === t.id;
+            return `<button type="button" class="choice-btn small ${active ? "active" : ""}" data-${tipeAttr}="${t.id}">${t.nama}</button>`;
+          }).join("")}
+        </div>
+      </div>
+      <div class="field">
+        <label>Kombinasi</label>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${KOMBINASI_LIST.map(k => {
+            const active = komboVal === k.key;
+            return `<button type="button" class="kombo-btn ${active ? "active" : ""}" data-${komboAttr}="${k.key}">
+              <span>${k.nama}</span><span class="price">${tipe ? rupiah(tipe[k.key]) : ""}</span>
+            </button>`;
+          }).join("")}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  let out = posisiGrid;
+  if (state.karetPosisi === "atas" || state.karetPosisi === "keduanya") {
+    out += group("Gigi Atas", state.karetTipeAtas, state.karetKombinasiAtas, "karet-tipe-atas", "karet-kombo-atas", state.karetPosisi === "keduanya");
+  }
+  if (state.karetPosisi === "bawah" || state.karetPosisi === "keduanya") {
+    out += group("Gigi Bawah", state.karetTipeBawah, state.karetKombinasiBawah, "karet-tipe-bawah", "karet-kombo-bawah", state.karetPosisi === "keduanya");
+  }
+  return out;
+}
+
+/* ===================== EVENT WIRING ===================== */
+function attachEvents() {
+  const app = document.getElementById("app");
+
+  // FAB
+  const fab = document.getElementById("fab-add");
+  if (fab) fab.addEventListener("click", () => { state.showForm = true; render(); });
+
+  // header buttons
+  const btnTarikSemua = document.getElementById("btn-tarik-semua");
+  if (btnTarikSemua) btnTarikSemua.addEventListener("click", () => tarikSemua());
+
+  // day toggles
+  app.querySelectorAll("[data-toggle-date]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const d = btn.getAttribute("data-toggle-date");
+      state.expandedDate = state.expandedDate === d ? null : d;
+      render();
+    });
+  });
+
+  // delete entry
+  app.querySelectorAll("[data-delete-entry]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-delete-entry");
+      const entry = state.entries.find((e) => e.id === id);
+      state.confirmDeleteEntry = entry || null;
+      render();
+    });
+  });
+
+  // delete withdraw
+  app.querySelectorAll("[data-delete-withdraw]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-delete-withdraw");
+      const w = state.withdrawals.find((x) => x.id === id);
+      state.confirmDeleteWithdraw = w || null;
+      render();
+    });
+  });
+
+  // ---- overlay click-outside-to-close ----
+  const overlayForm = document.getElementById("overlay-form");
+  if (overlayForm) overlayForm.addEventListener("click", (e) => {
+    if (e.target === overlayForm) { state.showForm = false; resetForm(); render(); }
+  });
+  const overlayConfirmEntry = document.getElementById("overlay-confirm-entry");
+  if (overlayConfirmEntry) overlayConfirmEntry.addEventListener("click", (e) => {
+    if (e.target === overlayConfirmEntry) { state.confirmDeleteEntry = null; render(); }
+  });
+  const overlayConfirmWithdraw = document.getElementById("overlay-confirm-withdraw");
+  if (overlayConfirmWithdraw) overlayConfirmWithdraw.addEventListener("click", (e) => {
+    if (e.target === overlayConfirmWithdraw) { state.confirmDeleteWithdraw = null; render(); }
+  });
+
+  /* ---- form modal fields ---- */
+  const fTanggal = document.getElementById("f-tanggal");
+  if (fTanggal) fTanggal.addEventListener("change", (e) => { state.tanggal = e.target.value; });
+
+  const fKategoriGroup = document.getElementById("f-kategori-group");
+  if (fKategoriGroup) fKategoriGroup.querySelectorAll("[data-kategori]").forEach((btn) => {
+    btn.addEventListener("click", () => { state.kategori = btn.getAttribute("data-kategori"); render(); });
+  });
+
+  const fMetodeGroup = document.getElementById("f-metode-group");
+  if (fMetodeGroup) fMetodeGroup.querySelectorAll("[data-metode]").forEach((btn) => {
+    btn.addEventListener("click", () => { state.metodeBayar = btn.getAttribute("data-metode"); render(); });
+  });
+
+  const fPosisiGroup = document.getElementById("f-posisi-group");
+  if (fPosisiGroup) fPosisiGroup.querySelectorAll("[data-posisi]").forEach((btn) => {
+    btn.addEventListener("click", () => { state.posisi = btn.getAttribute("data-posisi"); render(); });
+  });
+
+  const fJumlahBracketGroup = document.getElementById("f-jumlah-bracket-group");
+  if (fJumlahBracketGroup) fJumlahBracketGroup.querySelectorAll("[data-jumlah-bracket]").forEach((btn) => {
+    btn.addEventListener("click", () => { state.jumlahBracket = Number(btn.getAttribute("data-jumlah-bracket")); render(); });
+  });
+
+  const fJumlahDiamond = document.getElementById("f-jumlah-diamond");
+  if (fJumlahDiamond) fJumlahDiamond.addEventListener("input", (e) => { state.jumlahDiamond = e.target.value; render(); });
+
+  const fJumlahBenerin = document.getElementById("f-jumlah-benerin");
+  if (fJumlahBenerin) fJumlahBenerin.addEventListener("input", (e) => { state.jumlahBenerin = e.target.value; render(); });
+
+  const fCatatan = document.getElementById("f-catatan");
+  if (fCatatan) fCatatan.addEventListener("input", (e) => { state.catatan = e.target.value; });
+
+  const fKaretPosisiGroup = document.getElementById("f-karet-posisi-group");
+  if (fKaretPosisiGroup) fKaretPosisiGroup.querySelectorAll("[data-karet-posisi]").forEach((btn) => {
+    btn.addEventListener("click", () => { state.karetPosisi = btn.getAttribute("data-karet-posisi"); render(); });
+  });
+
+  app.querySelectorAll("[data-karet-tipe-atas]").forEach((btn) => {
+    btn.addEventListener("click", () => { state.karetTipeAtas = Number(btn.getAttribute("data-karet-tipe-atas")); render(); });
+  });
+  app.querySelectorAll("[data-karet-kombo-atas]").forEach((btn) => {
+    btn.addEventListener("click", () => { state.karetKombinasiAtas = btn.getAttribute("data-karet-kombo-atas"); render(); });
+  });
+  app.querySelectorAll("[data-karet-tipe-bawah]").forEach((btn) => {
+    btn.addEventListener("click", () => { state.karetTipeBawah = Number(btn.getAttribute("data-karet-tipe-bawah")); render(); });
+  });
+  app.querySelectorAll("[data-karet-kombo-bawah]").forEach((btn) => {
+    btn.addEventListener("click", () => { state.karetKombinasiBawah = btn.getAttribute("data-karet-kombo-bawah"); render(); });
+  });
+
+  const btnCancelForm = document.getElementById("btn-cancel-form");
+  if (btnCancelForm) btnCancelForm.addEventListener("click", () => { state.showForm = false; resetForm(); render(); });
+
+  const btnSaveEntry = document.getElementById("btn-save-entry");
+  if (btnSaveEntry) btnSaveEntry.addEventListener("click", () => tambahEntry());
+
+  /* ---- confirm dialogs ---- */
+  const btnCancelDeleteEntry = document.getElementById("btn-cancel-delete-entry");
+  if (btnCancelDeleteEntry) btnCancelDeleteEntry.addEventListener("click", () => { state.confirmDeleteEntry = null; render(); });
+
+  const btnConfirmDeleteEntry = document.getElementById("btn-confirm-delete-entry");
+  if (btnConfirmDeleteEntry) btnConfirmDeleteEntry.addEventListener("click", async () => {
+    const id = state.confirmDeleteEntry.id;
+    state.confirmDeleteEntry = null;
+    await hapusEntry(id);
+  });
+
+  const btnCancelDeleteWithdraw = document.getElementById("btn-cancel-delete-withdraw");
+  if (btnCancelDeleteWithdraw) btnCancelDeleteWithdraw.addEventListener("click", () => { state.confirmDeleteWithdraw = null; render(); });
+
+  const btnConfirmDeleteWithdraw = document.getElementById("btn-confirm-delete-withdraw");
+  if (btnConfirmDeleteWithdraw) btnConfirmDeleteWithdraw.addEventListener("click", async () => {
+    const id = state.confirmDeleteWithdraw.id;
+    state.confirmDeleteWithdraw = null;
+    await hapusWithdrawal(id);
+  });
+}
+
+
+
+/* ===================== INIT ===================== */
+(async function init() {
+  try {
+    await loadAll();
+  } catch (err) {
+    // Even if something totally unexpected happens (corrupt data, IndexedDB
+    // unavailable, etc.), don't leave the user stuck on "Memuat...".
+    // Start fresh with empty data instead of hanging forever.
+    state.entries = [];
+    state.withdrawals = [];
+    state.withdrawnAt = null;
+    state.error = "Gagal memuat data tersimpan. Memulai dengan data kosong.";
+    state.loaded = true;
+  }
+  render();
+})();
+
+})();
+</script>
+</body>
+</html>
