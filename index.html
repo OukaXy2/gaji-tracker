@@ -258,7 +258,14 @@ function getSupabaseClient() {
 /* ===================== DATA ATURAN ===================== */
 const RULES = {
   behel_bagus: { label: "Behel bagus", modal: 53000, harga: 80000, inu: 15000, aka: 12000 },
-  benerin: { label: "Benerin behel", modal: 4000, harga: 6000, inu: 1000, aka: 1000 },
+};
+
+// Benerin behel punya 3 varian harga tergantung asal bracket/karetnya
+// (lihat poster promo). Semua untung masuk ke Inu, Aka tidak dapat bagian.
+const BENERIN_VARIAN = {
+  bawa_sendiri: { label: "Bawa sendiri", modal: 4000, harga: 5000, inu: 1000, aka: 0 },
+  dari_sini_biasa: { label: "Dari sini (biasa)", modal: 5000, harga: 6000, inu: 1000, aka: 0 },
+  dari_sini_bagus: { label: "Dari sini (bagus)", modal: 7000, harga: 8000, inu: 1000, aka: 0 },
 };
 
 // Behel biasa harganya tergantung jumlah bracket yang dipasang (per rahang: atas
@@ -491,6 +498,7 @@ const state = {
   jumlahBracket: 8,
   jumlahDiamond: 1,
   jumlahBenerin: 1,
+  benerinVarian: "dari_sini_biasa",
   karetPosisi: "atas",
   karetTipeAtas: 1,
   karetKombinasiAtas: "karet",
@@ -516,6 +524,7 @@ function resetForm() {
   state.jumlahBracket = 8;
   state.jumlahDiamond = 1;
   state.jumlahBenerin = 1;
+  state.benerinVarian = "dari_sini_biasa";
   state.karetPosisi = "atas";
   state.karetTipeAtas = 1;
   state.karetKombinasiAtas = "karet";
@@ -667,10 +676,11 @@ function hitung() {
     };
   }
   if (kategori === "benerin") {
-    const r = RULES.benerin;
+    const r = BENERIN_VARIAN[state.benerinVarian];
+    if (!r) return null;
     const n = Number(state.jumlahBenerin) || 0;
     return {
-      label: `Benerin behel x${n}`,
+      label: `Benerin behel (${r.label}) x${n}`,
       modal: r.modal * n, harga: r.harga * n, inu: r.inu * n, aka: r.aka * n,
       untung: (r.harga - r.modal) * n,
     };
@@ -1022,6 +1032,15 @@ function render() {
 
           ${state.kategori === "benerin" ? `
           <div class="field">
+            <label>Jenis benerin</label>
+            <div class="choice-grid cols-1" id="f-benerin-varian-group">
+              ${renderChoiceButtons(
+                Object.entries(BENERIN_VARIAN).map(([k, v]) => ({ v: k, l: `${v.label} — ${rupiah(v.harga)}` })),
+                state.benerinVarian, "benerin-varian"
+              )}
+            </div>
+          </div>
+          <div class="field">
             <label>Jumlah behel dibenerin</label>
             <input type="number" min="1" id="f-jumlah-benerin" value="${state.jumlahBenerin}" />
           </div>` : ""}
@@ -1279,6 +1298,11 @@ function attachEvents() {
 
   const fJumlahBenerin = document.getElementById("f-jumlah-benerin");
   if (fJumlahBenerin) fJumlahBenerin.addEventListener("input", (e) => { state.jumlahBenerin = e.target.value; render(); });
+
+  const fBenerinVarianGroup = document.getElementById("f-benerin-varian-group");
+  if (fBenerinVarianGroup) fBenerinVarianGroup.querySelectorAll("[data-benerin-varian]").forEach((btn) => {
+    btn.addEventListener("click", () => { state.benerinVarian = btn.getAttribute("data-benerin-varian"); render(); });
+  });
 
   const fCatatan = document.getElementById("f-catatan");
   if (fCatatan) fCatatan.addEventListener("input", (e) => { state.catatan = e.target.value; });
